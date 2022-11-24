@@ -101,6 +101,17 @@ io.on('connection',(socket) =>{
             console.log(err);
         }
     })
+    socket.on('msg', async(data) => {
+    try{
+    io.to(data.roomName).emit('msg' ,{
+    username:data.username,
+    msg: data.msg,
+    })
+    }
+    catch(err){
+    console.log(err.toString());
+    }} )
+
 
 
     //painting area callback
@@ -116,26 +127,6 @@ io.on('connection',(socket) =>{
             io.to(roomName).emit('points',{details: details});
     })
 
-    //color callback
-    socket.on('color-change', async ({color, roomName})=>{
-        // console.log(color);
-        // console.log(roomName);
-        io.to(roomName).emit('color-change',color);
-    })
-
-
-    //stroke-width callback
-    socket.on('stroke-width', async ({value, roomName})=>{
-        // console.log(value);
-        // console.log(roomName);
-        io.to(roomName).emit('stroke-width',value);
-    })
-
-    //clear-screen callback
-    socket.on('clear-screen', (roomName)=>{
-        io.to(roomName).emit('clear',roomName);
-        // console.log(roomName);
-    })
 
 });
 
