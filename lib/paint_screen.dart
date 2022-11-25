@@ -221,7 +221,9 @@ class _PaintScreenState extends State<PaintScreen> {
 
     return Scaffold(
         backgroundColor: Colors.blueGrey.shade100,
-        body: Stack(
+        body: dataOfRoom != null
+          ? dataOfRoom['isJoin'] != true
+              ? Stack(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -384,7 +386,17 @@ class _PaintScreenState extends State<PaintScreen> {
               ],
             ),
           ],
-        ),
+        )
+        : WaitingLobbyScreen(
+                  lobbyName: dataOfRoom['name'],
+                  noOfPlayers: dataOfRoom['players'].length,
+                  occupancy: dataOfRoom['occupancy'],
+                  isPartyLeader: widget.isPartyLeader,
+                  players: dataOfRoom['players'],
+                ):
+               const Center(
+              child: CircularProgressIndicator(),
+            ),
         floatingActionButton: Container(
           margin: EdgeInsets.only(bottom: 30),
           child: FloatingActionButton(
