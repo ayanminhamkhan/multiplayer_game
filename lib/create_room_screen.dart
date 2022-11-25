@@ -28,8 +28,12 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
         _maxRoundsValue != null &&
         _maxSizeValue != null) {
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>
-              PaintScreen(data: data, screenFrom: 'createRoom')));
+          builder: (context) => PaintScreen(
+                data: data,
+                nickname: _nameController.text.trim(),
+                screenFrom: 'createRoom',
+                isPartyLeader: true,
+              )));
     }
   }
 

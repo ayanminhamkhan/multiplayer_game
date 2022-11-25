@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drawize/models/my_custom_painter.dart';
 import 'package:drawize/models/touch_points.dart';
+import 'package:drawize/waiting_lobby_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -10,7 +11,14 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class PaintScreen extends StatefulWidget {
   final Map<String, String> data;
   final String screenFrom;
-  PaintScreen({required this.data, required this.screenFrom});
+  final String nickname;
+  final bool isPartyLeader;
+  const PaintScreen(
+      {super.key,
+      required this.data,
+      required this.screenFrom,
+      required this.nickname,
+      required this.isPartyLeader});
 
   @override
   State<PaintScreen> createState() => _PaintScreenState();
@@ -83,12 +91,17 @@ class _PaintScreenState extends State<PaintScreen> {
     //listen to socket
     _socket.onConnect((data) {
       print('connected!');
+
+      //listening to new entry in room
       _socket.on('updateRoom', (roomData) {
         print(roomData['word']);
         setState(() {
           renderTextBlank(roomData['word']);
           dataOfRoom = roomData;
         });
+        // print(roomData);
+        // print(dataOfRoom);
+        // print('object');
         if (roomData['isJoin'] != true) {
           //start the timer
           startTimer();
@@ -214,12 +227,15 @@ class _PaintScreenState extends State<PaintScreen> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Close'))
+                      child: const Text('Close'))
                 ],
               ));
     }
 
+    // print(dataOfRoom);
+
     return Scaffold(
+
         backgroundColor: Colors.blueGrey.shade100,
         body: dataOfRoom != null
           ? dataOfRoom['isJoin'] != true
@@ -266,10 +282,44 @@ class _PaintScreenState extends State<PaintScreen> {
                           child: CustomPaint(
                             size: Size.infinite,
                             painter: MyCustomPainter(pointsList: points),
+
                           ),
                         ),
-                      ),
+                        Row(children: [
+                          IconButton(
+                            icon: Icon(Icons.color_lens, color: selectedColor),
+                            onPressed: () {
+                              selectColor();
+                            },
+                          ),
+                          Expanded(
+                            child: Slider(
+                                min: 1.0,
+                                max: 10,
+                                label: "Strokewidth $strokeWidth",
+                                activeColor: selectedColor,
+                                value: strokeWidth,
+                                onChanged: (double value) {
+                                  Map map = {
+                                    'value': value,
+                                    'roomName': widget.data['name'],
+                                  };
+                                  // print(map);
+                                  _socket.emit('stroke-width', map);
+                                }),
+                          ),
+                          IconButton(
+                            icon:
+                                Icon(Icons.layers_clear, color: selectedColor),
+                            onPressed: () {
+                              _socket.emit('clear-screen', widget.data['name']);
+                              // print(widget.data['name']);
+                            },
+                          ),
+                        ]),
+                      ],
                     ),
+
                   ),
                 ),
                 Row(children: [
@@ -388,6 +438,7 @@ class _PaintScreenState extends State<PaintScreen> {
           ],
         )
         : WaitingLobbyScreen(
+
                   lobbyName: dataOfRoom['name'],
                   noOfPlayers: dataOfRoom['players'].length,
                   occupancy: dataOfRoom['occupancy'],
@@ -409,5 +460,6 @@ class _PaintScreenState extends State<PaintScreen> {
             ),
           ),
         ));
+
   }
 }

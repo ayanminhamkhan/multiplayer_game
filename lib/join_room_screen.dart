@@ -25,8 +25,11 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
     if (_nameController.text.isNotEmpty &&
         _roomNameController.text.isNotEmpty) {
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>
-              PaintScreen(data: data, screenFrom: 'joinRoom')));
+          builder: (context) => PaintScreen(
+              data: data,
+              nickname: _nameController.text.trim(),
+              screenFrom: 'joinRoom',
+              isPartyLeader: false)));
     }
   }
 
